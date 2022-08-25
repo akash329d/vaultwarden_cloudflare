@@ -1,0 +1,3 @@
+# Data directory for vaultwarden, everything can be ignored
+*
+!.gitignore

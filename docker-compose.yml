@@ -1,0 +1,10 @@
+services:
+  vaultwarden:
+    image: vaultwarden/server:alpine
+    restart: always
+    volumes:
+      - ${PWD}/vaultwarden/:/data/
+    environment:
+      - WEBSOCKET_ENABLED: "true"
+      - LOG_FILE: /data/vaultwarden.log
+      - DOMAIN: https://{DOMAIN}
