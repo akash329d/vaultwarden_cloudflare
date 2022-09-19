@@ -7,4 +7,13 @@ services:
     environment:
       - WEBSOCKET_ENABLED: "true"
       - LOG_FILE: /data/vaultwarden.log
-      - DOMAIN: https://{DOMAIN}
+      - DOMAIN: https://${DOMAIN}
+      - SMTP_FROM_NAME: Vaultwarden (${DOMAIN})
+      - IP_HEADER: CF-Connecting-IP
+
+  cloudflared:
+    image: cloudflare/cloudflared
+    restart: always
+    entrypoint: tunnel --no-autoupdate run --token ${CF_TOKEN}
+    depends_on:
+    - vaultwarden
