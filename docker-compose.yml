@@ -14,6 +14,6 @@ services:
   cloudflared:
     image: cloudflare/cloudflared
     restart: always
-    entrypoint: tunnel --no-autoupdate run --token ${CF_TOKEN}
+    command: tunnel --no-autoupdate run --token ${CF_TOKEN}
     depends_on:
     - vaultwarden
