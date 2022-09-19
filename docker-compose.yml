@@ -5,11 +5,11 @@ services:
     volumes:
       - ${PWD}/vaultwarden/:/data/
     environment:
-      - WEBSOCKET_ENABLED: "true"
-      - LOG_FILE: /data/vaultwarden.log
-      - DOMAIN: https://${DOMAIN}
-      - SMTP_FROM_NAME: Vaultwarden (${DOMAIN})
-      - IP_HEADER: CF-Connecting-IP
+      WEBSOCKET_ENABLED: "true"
+      LOG_FILE: /data/vaultwarden.log
+      DOMAIN: https://${DOMAIN}
+      SMTP_FROM_NAME: Vaultwarden (${DOMAIN})
+      IP_HEADER: CF-Connecting-IP
 
   cloudflared:
     image: cloudflare/cloudflared
