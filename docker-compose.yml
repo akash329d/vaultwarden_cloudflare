@@ -38,4 +38,4 @@ services:
       - ${PWD}/backup/:/backup/
       - ${PWD}/backup_script:/etc/periodic/15min/:ro
       - ${PWD}/rclone:/config/
-    command: crond -fS
+    command: sh -c 'apk --update --no-cache add sqlite zip && crond -fS'
