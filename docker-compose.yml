@@ -5,7 +5,7 @@ services:
     volumes:
       - ${PWD}/vaultwarden/:/data/
     environment:
-      WEBSOCKET_ENABLED: "true"
+      WEBSOCKET_ENABLED: true
       LOG_FILE: /data/vaultwarden.log
       DOMAIN: https://${DOMAIN}
       SMTP_FROM_NAME: Vaultwarden (${DOMAIN})
@@ -16,4 +16,26 @@ services:
     restart: always
     command: tunnel --no-autoupdate run --token ${CF_TOKEN}
     depends_on:
-    - vaultwarden
+      - vaultwarden
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    depends_on:
+      - vaultwarden
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WATCHTOWER_CLEAUP: true
+
+  rclone:
+    image: rclone/rclone
+    restart: always
+    depends_on:
+      - vaultwarden
+    volumes:
+      - ${PWD}/vaultwarden/:/data/
+      - ${PWD}/backup/:/backup/
+      - ${PWD}/utils/backup:/etc/periodic/15min/:ro
+      - ${PWD}/rclone:/config/
+    command: crond -fS

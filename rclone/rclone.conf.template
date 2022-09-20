@@ -1,0 +1,6 @@
+[gdrive]
+type = drive
+client_id =
+client_secret =
+scope =
+token =

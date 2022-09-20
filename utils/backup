@@ -1,0 +1,64 @@
+#!/bin/sh
+
+# This is a script designed to backup Vaultwarden data using RSync
+# Backs up files defined in https://github.com/dani-garcia/vaultwarden/wiki/Backing-up-your-vault
+# Backs up every hour (set in crond for rclone alpine docker)
+
+# Assumes backup directory of /backup and vaultwarden directory of /data
+BACKUP_DIR="/backup"
+BACKUP_TMP="${BACKUP_DIR}/tmp"
+DATA_DIR="/data"
+
+mkdir -p "${BACKUP_TMP}"
+
+# Generate filenames
+DATE_SUFFIX="$(date '+%m_%d_%Y_%H%M')"
+
+DB_BACKUP_DIR="${BACKUP_TMP}/db.${DATE_SUFFIX}.sqlite3"
+ATTACHMENTS_BACKUP_DIR="${BACKUP_TMP}/attachments.${DATE_SUFFIX}.zip"
+SENDS_BACKUP_DIR="${BACKUP_TMP}/sends.${DATE_SUFFIX}.zip"
+CONFIG_JSON_BACKUP_DIR="${BACKUP_TMP}/config.${DATE_SUFFIX}.json"
+RSA_KEY_BACKUP_DIR="${BACKUP_TMP}/rsa_key.${DATE_SUFFIX}.zip"
+
+BACKUP_ZIP_DIR="${BACKUP_DIR}/vaultwarden_backup.${DATE_SUFFIX}.zip"
+
+
+# Backup Database
+DB="${DATA_DIR}/db.sqlite3"
+if [ -f "$DB" ]; then
+    sqlite3 "${DB}" "VACUUM INTO '${DB_BACKUP_DIR}'"
+else
+    echo "Could not find Vaultwarden DB!"
+fi
+
+# Backup Config
+CONFIG="${DATA_DIR}/config.json"
+if [ -f "$CONFIG" ]; then
+    cp -f "${CONFIG}" "${CONFIG_JSON_BACKUP_DIR}"
+else
+    echo "Could not find Vaultwarden config.json!"
+fi
+
+# Backup RSA
+zip "${RSA_KEY_BACKUP_DIR}" "${DATA_DIR}"/rsa_key*
+
+# Backup Attachments
+zip -r "${ATTACHMENTS_BACKUP_DIR}" "${DATA_DIR}/attachments"
+
+# Backup Sends
+zip -r "${SENDS_BACKUP_DIR}" "${DATA_DIR}/sends"
+
+# Do overall backup
+cd "${BACKUP_TMP}"
+ls -lah
+zip -r "${BACKUP_ZIP_DIR}" ./*
+cd -
+
+# Delete temporary backup folder
+rm -rf "${BACKUP_TMP}"
+
+# Delete backups older than 15 days
+find $BACKUP_DIR/* -mtime +15 -exec rm {} \;
+
+# Do RClone Sync
+rclone --config /config/rclone.conf sync $BACKUP_DIR gdrive:vaultwarden_backup
