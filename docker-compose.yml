@@ -38,5 +38,5 @@ services:
       - ${PWD}/backup/:/backup/
       - ${PWD}/backup_script:/etc/periodic/15min/:ro
       - ${PWD}/rclone:/config/
-    entrypoint: /bin/sh -c
-    command: /sbin/apk --update --no-cache add sqlite zip && crond -fS
+    entrypoint: ["/bin/sh" , "-c"] 
+    command: apk --update --no-cache add sqlite zip && crond -fS
