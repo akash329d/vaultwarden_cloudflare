@@ -5,11 +5,17 @@ services:
     volumes:
       - ${PWD}/vaultwarden/:/data/
     environment:
-      WEBSOCKET_ENABLED: true
-      LOG_FILE: /data/vaultwarden.log
-      DOMAIN: https://${DOMAIN}
-      SMTP_FROM_NAME: Vaultwarden (${DOMAIN})
-      IP_HEADER: CF-Connecting-IP
+      - DOMAIN=https://${DOMAIN}
+      - LOG_FILE=/data/vaultwarden.log
+      - SMTP_FROM_NAME=Vaultwarden (${DOMAIN})
+      - IP_HEADER=CF-Connecting-IP
+      - WEBSOCKET_ENABLED=true
+      - SIGNUPS_ALLOWED
+      - YUBICO_CLIENT_ID
+      - YUBICO_SECRET_KEY
+      - YUBICO_SERVER
+      - ORG_CREATION_USERS
+      
 
   cloudflared:
     image: cloudflare/cloudflared
@@ -17,6 +23,25 @@ services:
     command: tunnel --no-autoupdate run --token ${CF_TOKEN}
     depends_on:
       - vaultwarden
+
+  rclone:
+    image: rclone/rclone
+    restart: always
+    depends_on:
+      - vaultwarden
+    volumes:
+      - ${PWD}/vaultwarden/:/data/
+      - ${PWD}/backup/:/backup/
+      - ${PWD}/backup_script:/etc/periodic/${BACKUP_FREQUENCY}/:ro
+      - ${PWD}/rclone:/config/
+    environment:
+      - BACKUP_ENABLED
+      - BACKUP_DIR
+      - BACKUP_DATA_DIR
+      - BACKUP_RCLONE_CONFIG
+      - BACKUP_RCLONE_REMOTE_NAME
+      - BACKUP_RCLONE_REMOTE_PATH
+    entrypoint: ["/bin/sh" , "-c", "apk --update --no-cache add sqlite zip && crond -fS"] 
 
   watchtower:
     image: containrrr/watchtower
@@ -27,15 +52,3 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       WATCHTOWER_CLEANUP: true
-
-  rclone:
-    image: rclone/rclone
-    restart: always
-    depends_on:
-      - vaultwarden
-    volumes:
-      - ${PWD}/vaultwarden/:/data/
-      - ${PWD}/backup/:/backup/
-      - ${PWD}/backup_script:/etc/periodic/15min/:ro
-      - ${PWD}/rclone:/config/
-    entrypoint: ["/bin/sh" , "-c", "apk --update --no-cache add sqlite zip && crond -fS"] 
