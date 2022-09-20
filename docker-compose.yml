@@ -36,6 +36,6 @@ services:
     volumes:
       - ${PWD}/vaultwarden/:/data/
       - ${PWD}/backup/:/backup/
-      - ${PWD}/utils/backup:/etc/periodic/15min/:ro
+      - ${PWD}/backup_script:/etc/periodic/15min/:ro
       - ${PWD}/rclone:/config/
     command: crond -fS
