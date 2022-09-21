@@ -20,7 +20,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared
     restart: always
-    command: tunnel --no-autoupdate run --token ${CF_TOKEN}
+    command: tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
     depends_on:
       - vaultwarden
 
@@ -44,12 +44,18 @@ services:
     entrypoint: ["/bin/sh" , "-c", "apk --update --no-cache add sqlite zip && crond -fS"] 
 
   fail2ban:
-    image: linuxserver/fail2ban
+    image: crazymax/fail2ban
     restart: always
     depends_on:
     - vaultwarden
+    environment:
+    - PUID
+    - PGID
+    - CF_USER
+    - CF_TOKEN
+    - F2B_LOG_TARGET=/data/fail2ban.log
     volumes:
-    - ${PWD}/fail2ban:/config
+    - ${PWD}/fail2ban:/data
     - ${PWD}/vaultwarden:/vaultwarden:ro
 
   watchtower:

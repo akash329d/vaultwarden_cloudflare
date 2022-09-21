@@ -1,3 +1,5 @@
 .env
 rclone/rclone.conf
 backup/*
+fail2ban/fail2ban.log
+fail2ban/db
