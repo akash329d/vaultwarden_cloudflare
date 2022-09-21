@@ -43,6 +43,15 @@ services:
       - BACKUP_RCLONE_REMOTE_PATH
     entrypoint: ["/bin/sh" , "-c", "apk --update --no-cache add sqlite zip && crond -fS"] 
 
+  fail2ban:
+    image: linuxserver/fail2ban
+    restart: always
+    depends_on:
+    - vaultwarden
+    volumes:
+    - ${PWD}/fail2ban:/config
+    - ${PWD}/vaultwarden:/vaultwarden:ro
+
   watchtower:
     image: containrrr/watchtower
     restart: always
