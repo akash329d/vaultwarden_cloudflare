@@ -32,7 +32,7 @@ services:
     volumes:
       - ${PWD}/vaultwarden/:/data/
       - ${PWD}/backup/:/backup/
-      - ${PWD}/backup_script:/etc/periodic/${BACKUP_FREQUENCY}/:ro
+      - ${PWD}/utils/backup.sh:/etc/periodic/${BACKUP_FREQUENCY}/backup:ro
       - ${PWD}/rclone:/config/
     environment:
       - BACKUP_ENABLED
