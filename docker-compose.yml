@@ -1,6 +1,7 @@
 services:
   vaultwarden:
     image: vaultwarden/server:alpine
+    container_name: vaultwarden
     restart: always
     volumes:
       - ${PWD}/vaultwarden/:/data/
@@ -15,10 +16,10 @@ services:
       - YUBICO_SECRET_KEY
       - YUBICO_SERVER
       - ORG_CREATION_USERS
-      
 
   cloudflared:
     image: cloudflare/cloudflared
+    container_name: cloudflared
     restart: always
     command: tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
     depends_on:
@@ -26,6 +27,7 @@ services:
 
   rclone:
     image: rclone/rclone
+    container_name: rclone
     restart: always
     depends_on:
       - vaultwarden
@@ -45,6 +47,7 @@ services:
 
   fail2ban:
     image: crazymax/fail2ban
+    container_name: fail2ban
     restart: always
     depends_on:
     - vaultwarden
@@ -60,6 +63,7 @@ services:
 
   watchtower:
     image: containrrr/watchtower
+    container_name: watchtower
     restart: always
     depends_on:
       - vaultwarden
@@ -67,3 +71,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       WATCHTOWER_CLEANUP: true
+
+  portainer:
+    image: portainer/portainer-ce
+    container_name: portainer
+    restart: always
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ${PWD}//portainer:/data
