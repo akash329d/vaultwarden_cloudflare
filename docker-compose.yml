@@ -47,6 +47,7 @@ services:
       - BACKUP_RCLONE_CONFIG
       - BACKUP_RCLONE_REMOTE_NAME
       - BACKUP_RCLONE_REMOTE_PATH
+      - TZ
     entrypoint: ["/bin/sh" , "-c", "apk --update --no-cache add sqlite zip && crond -fS"] 
     networks:
       - vwd
@@ -63,6 +64,7 @@ services:
       - CF_USER
       - CF_TOKEN
       - F2B_LOG_TARGET=/data/fail2ban.log
+      - TZ
     volumes:
       - ${PWD}/fail2ban:/data
       - ${PWD}/vaultwarden:/vaultwarden:ro
@@ -78,7 +80,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      WATCHTOWER_CLEANUP: true
+      - WATCHTOWER_CLEANUP=true
+      - TZ
     networks:
       - vwd
 
