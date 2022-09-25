@@ -16,6 +16,8 @@ services:
       - YUBICO_SECRET_KEY
       - YUBICO_SERVER
       - ORG_CREATION_USERS
+    networks:
+      - vwd
 
   cloudflared:
     image: cloudflare/cloudflared
@@ -24,6 +26,8 @@ services:
     command: tunnel --no-autoupdate run --token ${CF_TUNNEL_TOKEN}
     depends_on:
       - vaultwarden
+    networks:
+      - vwd
 
   rclone:
     image: rclone/rclone
@@ -44,22 +48,26 @@ services:
       - BACKUP_RCLONE_REMOTE_NAME
       - BACKUP_RCLONE_REMOTE_PATH
     entrypoint: ["/bin/sh" , "-c", "apk --update --no-cache add sqlite zip && crond -fS"] 
+    networks:
+      - vwd
 
   fail2ban:
     image: crazymax/fail2ban
     container_name: fail2ban
     restart: always
     depends_on:
-    - vaultwarden
+      - vaultwarden
     environment:
-    - PUID
-    - PGID
-    - CF_USER
-    - CF_TOKEN
-    - F2B_LOG_TARGET=/data/fail2ban.log
+      - PUID
+      - PGID
+      - CF_USER
+      - CF_TOKEN
+      - F2B_LOG_TARGET=/data/fail2ban.log
     volumes:
-    - ${PWD}/fail2ban:/data
-    - ${PWD}/vaultwarden:/vaultwarden:ro
+      - ${PWD}/fail2ban:/data
+      - ${PWD}/vaultwarden:/vaultwarden:ro
+    networks:
+      - vwd
 
   watchtower:
     image: containrrr/watchtower
@@ -71,6 +79,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       WATCHTOWER_CLEANUP: true
+    networks:
+      - vwd
 
   portainer:
     image: portainer/portainer-ce
@@ -80,3 +90,9 @@ services:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ${PWD}//portainer:/data
+    networks:
+      - vwd
+
+networks:
+  vwd:
+    name: vwd_network
