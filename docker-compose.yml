@@ -16,6 +16,7 @@ services:
       - YUBICO_SECRET_KEY
       - YUBICO_SERVER
       - ORG_CREATION_USERS
+      - SHOW_PASSWORD_HINT
     networks:
       - vwd
 
@@ -49,6 +50,7 @@ services:
       - BACKUP_RCLONE_REMOTE_PATH
       - TZ
     entrypoint: ["/bin/sh" , "-c", "apk --update --no-cache add sqlite zip && crond -fS"] 
+    init: true # Needed for SIGTERM to stop process to prevent timeouts
     networks:
       - vwd
 
